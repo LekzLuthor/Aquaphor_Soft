@@ -43,7 +43,7 @@
    <string notr="true">background-color: rgb(33,36,44);</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTimeEdit" name="timeEdit">
+   <widget class="QTimeEdit" name="reportTime">
     <property name="geometry">
      <rect>
       <x>480</x>
@@ -331,6 +331,19 @@ QPushButton:pressed{
     </property>
     <property name="styleSheet">
      <string notr="true">color: white;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="test">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>440</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>test</string>
     </property>
    </widget>
   </widget>

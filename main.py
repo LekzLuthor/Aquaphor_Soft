@@ -1,8 +1,12 @@
+import json
 import sys
-import re
+import datetime
+import os
+import openpyxl
+import pprint
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox, QTimeEdit
 from PyQt5 import uic
 import smtplib
 from email.message import EmailMessage
@@ -14,21 +18,30 @@ class MainWindow(QMainWindow):
         uic.loadUi('main_window.ui', self)
         self.EMAIL_SENDER = "koshanskiy00@mail.ru"
         self.EMAIL_SENDER_PASS = ""
-        self.recipient_email = ""
+        self.settings = {}
+        self.database = {}
+        with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
+            self.settings = json.load(file)
 
+        # привязка кнопок + редактура полей
         self.generateReportButton.clicked.connect(self.send_report)
         self.saveChangesButton.clicked.connect(self.save_changes)
         self.emailSetForm.setPlaceholderText("example@aquaphor.com")
 
+        self.test.clicked.connect(self.load_database)
+
     def save_changes(self):
         email = self.emailSetForm.toPlainText()
         if self.check_email(email):
-            self.recipient_email = email
+            self.settings["email"] = email
         else:
             return
+        self.settings["report_time"] = str(self.reportTime.time().toPyTime())
+        with open("sours/settings.json", "w") as file:  # сохраняет настройки в json файл
+            json.dump(self.settings, file)
 
     @staticmethod
-    def check_email(email):
+    def check_email(email):  # проверка правильности ввода почты
         if email and (
                 "@aquaphor.com" in email or "@mail.ru" in email or "@gmail.com" in email or "@yandex.com" in email
         ):
@@ -40,6 +53,33 @@ class MainWindow(QMainWindow):
             msg.setWindowTitle("Warning")
             retval = msg.exec_()
             return False
+
+    def load_database(self):
+        files_name = os.listdir("sours/data/")
+        for f_index, f in enumerate(files_name):
+
+            print()
+
+            excel_file = openpyxl.open(f'sours/data/{f}', read_only=True)
+            sheet = excel_file.active
+
+            start_line_ind = 0
+            while sheet[f'B{start_line_ind}'].value != "№ п/п":
+                start_line_ind += 1
+            start_line_ind += 3
+
+            end_line_ind = start_line_ind + 1
+            while sheet[f'B{end_line_ind}'].value is not None:
+                end_line_ind += 1
+
+            equipment = []
+            for ind in range(start_line_ind, end_line_ind + 1):
+                line = [i.value for i in sheet[f'A{ind}':f'L{ind}'][0]]
+                equipment.append(line)
+
+            self.database[str(f_index)] = equipment
+
+        pprint.pprint(self.database)
 
     def send_mail_with_excel(self, recipient_email, subject, content, excel_file):
         msg = EmailMessage()
