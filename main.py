@@ -12,14 +12,21 @@ import smtplib
 from email.message import EmailMessage
 
 
+# что-то хотел дозаписать в json файл??
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main_window.ui', self)
+
+        # блок данных программы
         self.EMAIL_SENDER = "koshanskiy00@mail.ru"
         self.EMAIL_SENDER_PASS = ""
         self.settings = {}
-        self.database = {}
+        self.excel_files_names = []  # список названий файлов
+        self.database = {}  # база данных сформированная из файлов
+        self.equipment_report = {}  # оборудование с просроченной датой калибровки
+
         with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
             self.settings = json.load(file)
 
@@ -28,7 +35,12 @@ class MainWindow(QMainWindow):
         self.saveChangesButton.clicked.connect(self.save_changes)
         self.emailSetForm.setPlaceholderText("example@aquaphor.com")
 
-        self.test.clicked.connect(self.load_database)
+        # кнопка для тестов
+        self.test.clicked.connect(self.create_report)
+
+        # блок логики программы при запуске
+        self.load_database()
+        print("done")
 
     def save_changes(self):
         email = self.emailSetForm.toPlainText()
@@ -56,10 +68,8 @@ class MainWindow(QMainWindow):
 
     def load_database(self):
         files_name = os.listdir("sours/data/")
-        for f_index, f in enumerate(files_name):
-
-            print()
-
+        self.excel_files_names = os.listdir("sours/data/")
+        for f_index, f in enumerate(files_name, 1):
             excel_file = openpyxl.open(f'sours/data/{f}', read_only=True)
             sheet = excel_file.active
 
@@ -79,7 +89,20 @@ class MainWindow(QMainWindow):
 
             self.database[str(f_index)] = equipment
 
-        pprint.pprint(self.database)
+    def create_report(self):
+        for list_num in self.database.keys():
+            equipment_to_report = []
+            for eq_num in range(len(self.database[list_num])):
+                if self.database[list_num][eq_num][9]:
+                    try:
+                        if self.database[list_num][eq_num][9].date() < datetime.date.today():
+                            equipment_to_report.append(self.database[list_num][eq_num])
+                    except Exception:
+                        print('29 FEBRUARY ERROR')
+            self.equipment_report[list_num] = equipment_to_report
+
+        print('-----------------------Список оборудования на калибровку-----------------------')
+        pprint.pprint(self.equipment_report)
 
     def send_mail_with_excel(self, recipient_email, subject, content, excel_file):
         msg = EmailMessage()
