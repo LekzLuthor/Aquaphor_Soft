@@ -4,6 +4,7 @@ import datetime
 import os
 import openpyxl
 import pprint
+import os
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox, QTimeEdit
@@ -11,8 +12,6 @@ from PyQt5 import uic
 import smtplib
 from email.message import EmailMessage
 
-
-# что-то хотел дозаписать в json файл??
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -43,13 +42,11 @@ class MainWindow(QMainWindow):
             for email in self.settings["emails"]:
                 self.emails.append(email)
 
-        # if self.check_pathway():
-        #     self.load_database()
-        # else:
-        #     pass
-
-        # self.load_database()
-        print("done")
+        if self.check_pathway():
+            self.load_database()
+            print("done")
+        else:
+            pass
 
     def save_changes(self):
         email = self.emailSetForm.toPlainText()
@@ -79,6 +76,9 @@ class MainWindow(QMainWindow):
             try:
                 with open(f'{pathway}/Your Excel Files Will Be here', 'w') as f:
                     f.writelines('Checking the correctness of path way')
+                if os.path.isfile(f'{pathway}/Your Excel Files Will Be here'):
+                    os.remove(f'{pathway}/Your Excel Files Will Be here')
+
             except OSError:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Warning)
@@ -117,15 +117,15 @@ class MainWindow(QMainWindow):
             return False
 
     def check_pathway(self):
-        if "load_pathway" in self.settings.keys() and "save_pathway" in self.settings.keys():
+        if "pathway" in self.settings.keys():
             return True
         return False
 
     def load_database(self):
-        files_name = os.listdir("sours/data/")
-        self.excel_files_names = os.listdir("sours/data/")
+        files_name = os.listdir(self.settings['pathway'])
+        self.excel_files_names = os.listdir(self.settings['pathway'])
         for f_index, f in enumerate(files_name, 1):
-            excel_file = openpyxl.open(f'sours/data/{f}', read_only=True)
+            excel_file = openpyxl.open(f'{self.settings["pathway"]}/{f}', read_only=True)
             sheet = excel_file.active
 
             start_line_ind = 0

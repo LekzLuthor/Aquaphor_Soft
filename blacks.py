@@ -1,17 +1,21 @@
 import os
 import pprint
 import datetime
+import json
 
 import openpyxl
 
+# проверил работу на блэках но не добавил в мейн
+
 
 def load_database():
-    files_name = os.listdir("sours/data/")
+    with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
+        settings = json.load(file)
+    files_name = os.listdir(settings['pathway'])
+
     for f_index, f in enumerate(files_name):
 
-        print()
-
-        excel_file = openpyxl.open(f'sours/data/{f}', read_only=True)
+        excel_file = openpyxl.open(f'{settings["pathway"]}/{f}', read_only=True)
         sheet = excel_file.active
 
         start_line_ind = 0
@@ -27,6 +31,7 @@ def load_database():
         for ind in range(start_line_ind, end_line_ind + 1):
             line = [i.value for i in sheet[f'A{ind}':f'L{ind}'][0]]
             equipment.append(line)
+        print(equipment)
 
 
 def create_report():
@@ -233,12 +238,4 @@ def report_to_excel():
               }
 
 
-def check_pathway(pathway):
-    if '\\' in pathway:
-        print(pathway)
-        return False
-    print(pathway)
-    return True
-
-
-print(check_pathway('C:\Users\Ром\PycharmProjects/test_pathway'))
+load_database()

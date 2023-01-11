@@ -186,7 +186,7 @@ QPushButton:pressed{
      <string notr="true">color: white;</string>
     </property>
     <property name="text">
-     <string>Auqaphor</string>
+     <string>Aquaphor</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
