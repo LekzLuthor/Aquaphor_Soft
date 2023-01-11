@@ -27,18 +27,24 @@ class MainWindow(QMainWindow):
         self.database = {}  # база данных сформированная из файлов
         self.equipment_report = {}  # оборудование с просроченной датой калибровки
 
-        with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
-            self.settings = json.load(file)
-
         # привязка кнопок + редактура полей
         self.generateReportButton.clicked.connect(self.send_report)
         self.saveChangesButton.clicked.connect(self.save_changes)
         self.emailSetForm.setPlaceholderText("example@aquaphor.com")
+        self.pathwaySetForm.setPlaceholderText("C:/path/path_with_files")
 
         # кнопка для тестов
         self.test.clicked.connect(self.create_report)
 
         # блок логики программы при запуске
+        with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
+            self.settings = json.load(file)
+
+        # if self.check_pathway():
+        #     self.load_database()
+        # else:
+        #     pass
+
         self.load_database()
         print("done")
 
@@ -65,6 +71,12 @@ class MainWindow(QMainWindow):
             msg.setWindowTitle("Warning")
             retval = msg.exec_()
             return False
+
+    def check_pathway(self):
+        for key in self.settings.keys():
+            if key == "pathway":
+                return True
+        return False
 
     def load_database(self):
         files_name = os.listdir("sours/data/")
@@ -97,12 +109,16 @@ class MainWindow(QMainWindow):
                     try:
                         if self.database[list_num][eq_num][9].date() < datetime.date.today():
                             equipment_to_report.append(self.database[list_num][eq_num])
+                        # добавить колибровку если дата равна и если до даты калибровки осталось меньше двух недель
                     except Exception:
                         print('29 FEBRUARY ERROR')
             self.equipment_report[list_num] = equipment_to_report
 
         print('-----------------------Список оборудования на калибровку-----------------------')
         pprint.pprint(self.equipment_report)
+
+    def report_to_excel(self):
+        pass
 
     def send_mail_with_excel(self, recipient_email, subject, content, excel_file):
         msg = EmailMessage()

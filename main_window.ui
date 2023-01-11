@@ -68,7 +68,7 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>330</y>
+      <y>360</y>
       <width>341</width>
       <height>91</height>
      </rect>
@@ -132,7 +132,7 @@ QPushButton:pressed{
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>270</y>
+      <y>300</y>
       <width>371</width>
       <height>151</height>
      </rect>
@@ -336,14 +336,62 @@ QPushButton:pressed{
    <widget class="QPushButton" name="test">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>440</y>
+      <x>600</x>
+      <y>310</y>
       <width>111</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
      <string>test</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>170</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Microsoft JhengHei UI</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>!!! pathway !!!</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="pathwaySetForm">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>220</y>
+      <width>261</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Microsoft JhengHei UI</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="cursor" stdset="0">
+     <cursorShape>IBeamCursor</cursorShape>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
     </property>
    </widget>
   </widget>
