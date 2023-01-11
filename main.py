@@ -26,12 +26,13 @@ class MainWindow(QMainWindow):
         self.excel_files_names = []  # список названий файлов
         self.database = {}  # база данных сформированная из файлов
         self.equipment_report = {}  # оборудование с просроченной датой калибровки
+        self.emails = []
 
         # привязка кнопок + редактура полей
         self.generateReportButton.clicked.connect(self.send_report)
         self.saveChangesButton.clicked.connect(self.save_changes)
         self.emailSetForm.setPlaceholderText("example@aquaphor.com")
-        self.pathwaySetForm.setPlaceholderText("C:/path/path_with_files")
+        self.pathwaySetForm.setPlaceholderText("C:/path/path with your Excel Files")
 
         # кнопка для тестов
         self.test.clicked.connect(self.create_report)
@@ -39,22 +40,65 @@ class MainWindow(QMainWindow):
         # блок логики программы при запуске
         with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
             self.settings = json.load(file)
+            for email in self.settings["emails"]:
+                self.emails.append(email)
 
         # if self.check_pathway():
         #     self.load_database()
         # else:
         #     pass
 
-        self.load_database()
+        # self.load_database()
         print("done")
 
     def save_changes(self):
         email = self.emailSetForm.toPlainText()
-        if self.check_email(email):
-            self.settings["email"] = email
+        if email != "":
+            if self.check_email(email):
+                if email not in self.settings["emails"]:
+                    self.settings["emails"].append(email)
+                    self.emailStatusBar.setText('mail added to list')
+                else:
+                    self.emailStatusBar.setText("you haven't entered a new email")
+            else:
+                pass
         else:
-            return
-        self.settings["report_time"] = str(self.reportTime.time().toPyTime())
+            self.emailStatusBar.setText("you haven't entered a new email")
+
+        if self.reportTime.time().toPyTime() != "00:00:00":
+            self.settings["report_time"] = str(self.reportTime.time().toPyTime())
+            self.timeStatusBar.setText('report time saved')
+        elif self.reportTime.time().toPyTime() == self.settings['report_time']:
+            self.timeStatusBar.setText("you haven't entered a new time")
+        else:
+            self.timeStatusBar.setText("you haven't entered a new time")
+
+        # Получение файлового пути и кэтч ошибки с неправильным (\) символом
+        try:
+            pathway = self.pathwaySetForm.toPlainText()
+            try:
+                with open(f'{pathway}/Your Excel Files Will Be here', 'w') as f:
+                    f.writelines('Checking the correctness of path way')
+            except OSError:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setText("Error: WRONG PATH WAY")
+                msg.setWindowTitle("Warning")
+                retval = msg.exec_()
+                self.pathwayStatusBar.setText('wrong path way')
+
+            if pathway != '':
+                self.settings["pathway"] = pathway
+                self.pathwayStatusBar.setText('pathway saved')
+
+        except SyntaxError:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Error: WRONG PATH WAY")
+            msg.setWindowTitle("Warning")
+            retval = msg.exec_()
+            self.pathwayStatusBar.setText('wrong path way')
+
         with open("sours/settings.json", "w") as file:  # сохраняет настройки в json файл
             json.dump(self.settings, file)
 
@@ -73,9 +117,8 @@ class MainWindow(QMainWindow):
             return False
 
     def check_pathway(self):
-        for key in self.settings.keys():
-            if key == "pathway":
-                return True
+        if "load_pathway" in self.settings.keys() and "save_pathway" in self.settings.keys():
+            return True
         return False
 
     def load_database(self):
@@ -118,7 +161,7 @@ class MainWindow(QMainWindow):
         pprint.pprint(self.equipment_report)
 
     def report_to_excel(self):
-        pass
+        return
 
     def send_mail_with_excel(self, recipient_email, subject, content, excel_file):
         msg = EmailMessage()

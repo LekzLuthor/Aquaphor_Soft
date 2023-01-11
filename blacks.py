@@ -232,3 +232,13 @@ def report_to_excel():
                      None]]
               }
 
+
+def check_pathway(pathway):
+    if '\\' in pathway:
+        print(pathway)
+        return False
+    print(pathway)
+    return True
+
+
+print(check_pathway('C:\Users\Ром\PycharmProjects/test_pathway'))
