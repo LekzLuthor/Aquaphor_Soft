@@ -2,6 +2,8 @@ import json
 import sys
 import datetime
 import os
+import time
+
 import openpyxl
 import pprint
 import os
@@ -28,7 +30,7 @@ class MainWindow(QMainWindow):
         self.emails = []
 
         # привязка кнопок + редактура полей
-        self.generateReportButton.clicked.connect(self.send_report)
+        self.generateReportButton.clicked.connect(self.report_to_excel)
         self.saveChangesButton.clicked.connect(self.save_changes)
         self.emailSetForm.setPlaceholderText("example@aquaphor.com")
         self.pathwaySetForm.setPlaceholderText("C:/path/path with your Excel Files")
@@ -41,12 +43,6 @@ class MainWindow(QMainWindow):
             self.settings = json.load(file)
             for email in self.settings["emails"]:
                 self.emails.append(email)
-
-        if self.check_pathway():
-            self.load_database()
-            print("done")
-        else:
-            pass
 
     def save_changes(self):
         email = self.emailSetForm.toPlainText()
@@ -157,11 +153,34 @@ class MainWindow(QMainWindow):
                         print('29 FEBRUARY ERROR')
             self.equipment_report[list_num] = equipment_to_report
 
-        print('-----------------------Список оборудования на калибровку-----------------------')
-        pprint.pprint(self.equipment_report)
-
     def report_to_excel(self):
-        return
+        if self.check_pathway():
+            self.load_database()
+            self.create_report()
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("You didn't specify path way")
+            msg.setWindowTitle("Warning")
+            retval = msg.exec_()
+            return
+        book = openpyxl.Workbook()
+        sheet = book.active
+        row = 1
+        col = 1
+        file_name_index = 0
+        for key in self.equipment_report.keys():
+            sheet.cell(row=row, column=col).value = self.excel_files_names[file_name_index]
+            row += 1
+            for equip in self.equipment_report[key]:
+                for item in equip:
+                    sheet.cell(row=row, column=col).value = item
+                    col += 1
+                col = 1
+                row += 1
+        book.save("report.xlsx")
+        book.close()
+        self.loadStatusChecker.setText('Complete')
 
     def send_mail_with_excel(self, recipient_email, subject, content, excel_file):
         msg = EmailMessage()

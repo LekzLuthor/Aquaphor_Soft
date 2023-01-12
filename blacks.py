@@ -5,8 +5,6 @@ import json
 
 import openpyxl
 
-# проверил работу на блэках но не добавил в мейн
-
 
 def load_database():
     with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
@@ -236,6 +234,22 @@ def report_to_excel():
                      None,
                      None]]
               }
+    book = openpyxl.Workbook()
+    sheet = book.active
+    row = 1
+    col = 1
+    for key in report.keys():
+        sheet.cell(row=row, column=col).value = 'filename'
+        row += 1
+        for equip in report[key]:
+            for item in equip:
+                sheet.cell(row=row, column=col).value = item
+                col += 1
+            col = 1
+            row += 1
+
+    book.save("report.xlsx")
+    book.close()
 
 
-load_database()
+report_to_excel()
