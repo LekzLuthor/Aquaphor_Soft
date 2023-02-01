@@ -1,16 +1,19 @@
+# дополнительные библиотеки
 import json
 import sys
 import datetime
 import os
 import time
 
+# для создания xlsx файлов
 import openpyxl
-import pprint
-import os
 
+# pyqt библиотеки (для интерфейса)
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox, QTimeEdit
 from PyQt5 import uic
+
+# библиотеки для отправки на почту
 import smtplib
 from email.message import EmailMessage
 
@@ -19,15 +22,18 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main_window.ui', self)
+        self.progressBar.setValue(0)
 
         # блок данных программы
-        self.EMAIL_SENDER = "koshanskiy00@mail.ru"
-        self.EMAIL_SENDER_PASS = ""
         self.settings = {}
         self.excel_files_names = []  # список названий файлов
         self.database = {}  # база данных сформированная из файлов
         self.equipment_report = {}  # оборудование с просроченной датой калибровки
         self.emails = []
+
+        # данные почты для отправки писем
+        self.SENDER = 'calibration.aquaphor@gmail.com'
+        self.SENDER_PASSWORD = 'ogwgkvtqnvjsfljr'
 
         # привязка кнопок + редактура полей
         self.generateReportButton.clicked.connect(self.report_to_excel)
@@ -36,7 +42,7 @@ class MainWindow(QMainWindow):
         self.pathwaySetForm.setPlaceholderText("C:/path/path with your Excel Files")
 
         # кнопка для тестов
-        self.test.clicked.connect(self.create_report)
+        self.test.clicked.connect(self.final_build)
 
         # блок логики программы при запуске
         with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
@@ -97,6 +103,7 @@ class MainWindow(QMainWindow):
 
         with open("sours/settings.json", "w") as file:  # сохраняет настройки в json файл
             json.dump(self.settings, file)
+        self.loadStatusChecker.setText('')
 
     @staticmethod
     def check_email(email):  # проверка правильности ввода почты
@@ -119,7 +126,8 @@ class MainWindow(QMainWindow):
 
     def load_database(self):
         files_name = os.listdir(self.settings['pathway'])
-        self.excel_files_names = os.listdir(self.settings['pathway'])
+        files_name = [file for file in files_name if file.endswith('xlsx')]
+        self.excel_files_names = files_name
         for f_index, f in enumerate(files_name, 1):
             excel_file = openpyxl.open(f'{self.settings["pathway"]}/{f}', read_only=True)
             sheet = excel_file.active
@@ -146,16 +154,38 @@ class MainWindow(QMainWindow):
             for eq_num in range(len(self.database[list_num])):
                 if self.database[list_num][eq_num][9]:
                     try:
+                        date_delta = datetime.date.today() - self.database[list_num][eq_num][9].date()
+                        # добавление если срок калибровки уже истёк
                         if self.database[list_num][eq_num][9].date() < datetime.date.today():
-                            equipment_to_report.append(self.database[list_num][eq_num])
-                        # добавить колибровку если дата равна и если до даты калибровки осталось меньше двух недель
+                            new_eq_format = [
+                                self.database[list_num][eq_num][0], self.database[list_num][eq_num][2],
+                                self.database[list_num][eq_num][3], self.database[list_num][eq_num][4],
+                                self.database[list_num][eq_num][6], self.database[list_num][eq_num][7],
+                                self.database[list_num][eq_num][8].date(), self.database[list_num][eq_num][9].date(),
+                                self.database[list_num][eq_num][10]
+                            ]
+                            equipment_to_report.append(new_eq_format)
+                            # 0 2 3 4 6 7 8 9 10 11
+                        # добавление если до срока калибровки осталось меньше месяца
+                        elif date_delta.days > -30:
+                            new_eq_format = [
+                                self.database[list_num][eq_num][0], self.database[list_num][eq_num][2],
+                                self.database[list_num][eq_num][3], self.database[list_num][eq_num][4],
+                                self.database[list_num][eq_num][6], self.database[list_num][eq_num][7],
+                                self.database[list_num][eq_num][8].date(), self.database[list_num][eq_num][9].date(),
+                                self.database[list_num][eq_num][10], '',
+                                f'до калибровки осталось {abs(date_delta.days)} дней'
+                            ]
+                            equipment_to_report.append(new_eq_format)
                     except Exception:
                         print('29 FEBRUARY ERROR')
             self.equipment_report[list_num] = equipment_to_report
 
     def report_to_excel(self):
         if self.check_pathway():
+            self.progressBar.setValue(20)
             self.load_database()
+            self.progressBar.setValue(40)
             self.create_report()
         else:
             msg = QMessageBox()
@@ -170,39 +200,40 @@ class MainWindow(QMainWindow):
         col = 1
         file_name_index = 0
         for key in self.equipment_report.keys():
+            row += 3
             sheet.cell(row=row, column=col).value = self.excel_files_names[file_name_index]
-            row += 1
+            row += 2
             for equip in self.equipment_report[key]:
                 for item in equip:
                     sheet.cell(row=row, column=col).value = item
                     col += 1
                 col = 1
                 row += 1
-        book.save("report.xlsx")
+        book.save("sours/reports/report.xlsx")
         book.close()
-        self.loadStatusChecker.setText('Complete')
 
-    def send_mail_with_excel(self, recipient_email, subject, content, excel_file):
-        msg = EmailMessage()
-        msg['Subject'] = subject
-        msg['From'] = self.EMAIL_SENDER
-        msg['To'] = recipient_email
-        msg.set_content(content)
+    def send_to_email(self):
+        for email in self.emails:
+            msg = EmailMessage()
+            msg['Subject'] = f'{datetime.date.today()} Report'
+            msg['From'] = self.SENDER
+            msg['To'] = email
 
-        with open(excel_file, 'rb') as f:
-            file_data = f.read()
-        msg.add_attachment(file_data, maintype="application", subtype="xlsx", filename=excel_file)
+            with open("sours/reports/report.xlsx", 'rb') as f:
+                file_data = f.read()
+            msg.add_attachment(file_data, maintype="application", subtype="xlsx", filename="report.xlsx")
 
-        with smtplib.SMTP_SSL('smtp.gmail.com', 587) as smtp:
-            smtp.login(self.EMAIL_SENDER, self.EMAIL_SENDER_PASS)
-            smtp.send_message(msg)
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login(self.SENDER, self.SENDER_PASSWORD)
+                smtp.send_message(msg)
 
-    def send_report(self):
-        self.send_mail_with_excel(
-            "artjom.verzilov@aquaphor.com", "Test",
-            "First Report", "Test.xlsx"
-        )
-        print("Done")
+    def final_build(self):
+        self.progressBar.setValue(0)
+        self.report_to_excel()
+        self.progressBar.setValue(60)
+        self.send_to_email()
+        self.progressBar.setValue(100)
+        self.loadStatusChecker.setText('report sent to email(s)')
 
 
 def excepthook(exc_type, exc_value, exc_tb):

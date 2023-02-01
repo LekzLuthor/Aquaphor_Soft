@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>900</width>
-    <height>500</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>900</width>
-    <height>500</height>
+    <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>900</width>
-    <height>500</height>
+    <height>600</height>
    </size>
   </property>
   <property name="font">
@@ -68,7 +68,7 @@
     <property name="geometry">
      <rect>
       <x>490</x>
-      <y>380</y>
+      <y>440</y>
       <width>341</width>
       <height>91</height>
      </rect>
@@ -132,7 +132,7 @@ QPushButton:pressed{
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>380</y>
+      <y>440</y>
       <width>371</width>
       <height>91</height>
      </rect>
@@ -322,30 +322,6 @@ QPushButton:pressed{
      <string notr="true">color: white;</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_8">
-    <property name="geometry">
-     <rect>
-      <x>45</x>
-      <y>220</y>
-      <width>381</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Microsoft JhengHei UI</family>
-      <pointsize>12</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: white;</string>
-    </property>
-    <property name="text">
-     <string>attention! use &quot;/&quot;  instead of &quot;\&quot; </string>
-    </property>
-   </widget>
    <widget class="QLabel" name="emailStatusBar">
     <property name="geometry">
      <rect>
@@ -403,8 +379,8 @@ QPushButton:pressed{
    <widget class="QLabel" name="pathwayStatusBar">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>280</y>
+      <x>60</x>
+      <y>210</y>
       <width>331</width>
       <height>21</height>
      </rect>
@@ -430,9 +406,9 @@ QPushButton:pressed{
    <widget class="QLabel" name="loadStatusChecker">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>330</y>
-      <width>331</width>
+      <x>100</x>
+      <y>340</y>
+      <width>261</width>
       <height>31</height>
      </rect>
     </property>
@@ -452,6 +428,23 @@ QPushButton:pressed{
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>390</y>
+      <width>371</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;
+</string>
+    </property>
+    <property name="value">
+     <number>24</number>
     </property>
    </widget>
   </widget>
