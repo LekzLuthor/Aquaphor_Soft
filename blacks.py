@@ -63,3 +63,11 @@ def send_to_email2():
 
 
 print(send_to_email2())
+
+# if self.reportTime.time().toPyTime() != "00:00:00":
+#     self.settings["report_time"] = str(self.reportTime.time().toPyTime())
+#     self.timeStatusBar.setText('report time saved')
+# elif self.reportTime.time().toPyTime() == self.settings['report_time']:
+#     self.timeStatusBar.setText("you haven't entered a new time")
+# else:
+#     self.timeStatusBar.setText("you haven't entered a new time")

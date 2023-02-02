@@ -3,15 +3,16 @@ import json
 import sys
 import datetime
 import os
-import time
+import resources_rc
 
 # для создания xlsx файлов
 import openpyxl
 
 # pyqt библиотеки (для интерфейса)
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox, QTimeEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox, QHBoxLayout, QLabel
 from PyQt5 import uic
+from PyQt5.QtGui import QPixmap
 
 # библиотеки для отправки на почту
 import smtplib
@@ -22,7 +23,13 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main_window.ui', self)
+
         self.progressBar.setValue(0)
+
+        # pixmap = QPixmap(':/sours/data/textures/bg.jpg')  # resource path starts with ':'
+        # label = QLabel()
+        # label.setPixmap(pixmap)
+
 
         # блок данных программы
         self.settings = {}
@@ -61,45 +68,36 @@ class MainWindow(QMainWindow):
                     self.emailStatusBar.setText("you haven't entered a new email")
             else:
                 pass
-        else:
-            self.emailStatusBar.setText("you haven't entered a new email")
-
-        if self.reportTime.time().toPyTime() != "00:00:00":
-            self.settings["report_time"] = str(self.reportTime.time().toPyTime())
-            self.timeStatusBar.setText('report time saved')
-        elif self.reportTime.time().toPyTime() == self.settings['report_time']:
-            self.timeStatusBar.setText("you haven't entered a new time")
-        else:
-            self.timeStatusBar.setText("you haven't entered a new time")
 
         # Получение файлового пути и кэтч ошибки с неправильным (\) символом
-        try:
-            pathway = self.pathwaySetForm.toPlainText()
+        if self.pathwaySetForm.toPlainText().strip():
             try:
-                with open(f'{pathway}/Your Excel Files Will Be here', 'w') as f:
-                    f.writelines('Checking the correctness of path way')
-                if os.path.isfile(f'{pathway}/Your Excel Files Will Be here'):
-                    os.remove(f'{pathway}/Your Excel Files Will Be here')
+                pathway = self.pathwaySetForm.toPlainText()
+                try:
+                    with open(f'{pathway}/Your Excel Files Will Be here', 'w') as f:
+                        f.writelines('Checking the correctness of path way')
+                    if os.path.isfile(f'{pathway}/Your Excel Files Will Be here'):
+                        os.remove(f'{pathway}/Your Excel Files Will Be here')
 
-            except OSError:
+                except OSError:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Warning)
+                    msg.setText("Error: WRONG PATH WAY")
+                    msg.setWindowTitle("Warning")
+                    retval = msg.exec_()
+                    self.pathwayStatusBar.setText('wrong path way')
+
+                if pathway != '':
+                    self.settings["pathway"] = pathway
+                    self.pathwayStatusBar.setText('pathway saved')
+
+            except SyntaxError:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Warning)
                 msg.setText("Error: WRONG PATH WAY")
                 msg.setWindowTitle("Warning")
                 retval = msg.exec_()
                 self.pathwayStatusBar.setText('wrong path way')
-
-            if pathway != '':
-                self.settings["pathway"] = pathway
-                self.pathwayStatusBar.setText('pathway saved')
-
-        except SyntaxError:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setText("Error: WRONG PATH WAY")
-            msg.setWindowTitle("Warning")
-            retval = msg.exec_()
-            self.pathwayStatusBar.setText('wrong path way')
 
         with open("sours/settings.json", "w") as file:  # сохраняет настройки в json файл
             json.dump(self.settings, file)
@@ -233,7 +231,6 @@ class MainWindow(QMainWindow):
         self.progressBar.setValue(60)
         self.send_to_email()
         self.progressBar.setValue(100)
-        self.loadStatusChecker.setText('report sent to email(s)')
 
 
 def excepthook(exc_type, exc_value, exc_tb):
