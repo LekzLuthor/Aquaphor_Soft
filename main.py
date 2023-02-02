@@ -3,7 +3,6 @@ import json
 import sys
 import datetime
 import os
-import resources_rc
 
 # для создания xlsx файлов
 import openpyxl
@@ -26,11 +25,6 @@ class MainWindow(QMainWindow):
 
         self.progressBar.setValue(0)
 
-        # pixmap = QPixmap(':/sours/data/textures/bg.jpg')  # resource path starts with ':'
-        # label = QLabel()
-        # label.setPixmap(pixmap)
-
-
         # блок данных программы
         self.settings = {}
         self.excel_files_names = []  # список названий файлов
@@ -43,13 +37,10 @@ class MainWindow(QMainWindow):
         self.SENDER_PASSWORD = 'ogwgkvtqnvjsfljr'
 
         # привязка кнопок + редактура полей
-        self.generateReportButton.clicked.connect(self.report_to_excel)
+        self.generateReportButton.clicked.connect(self.final_build)
         self.saveChangesButton.clicked.connect(self.save_changes)
         self.emailSetForm.setPlaceholderText("example@aquaphor.com")
         self.pathwaySetForm.setPlaceholderText("C:/path/path with your Excel Files")
-
-        # кнопка для тестов
-        self.test.clicked.connect(self.final_build)
 
         # блок логики программы при запуске
         with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
