@@ -8,10 +8,8 @@ import os
 import openpyxl
 
 # pyqt библиотеки (для интерфейса)
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from PyQt5 import uic
-from PyQt5.QtGui import QPixmap
 
 # библиотеки для отправки на почту
 import smtplib
@@ -22,8 +20,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main_window.ui', self)
-
         self.progressBar.setValue(0)
+        self.setWindowTitle("Aquaphor")
 
         # блок данных программы
         self.settings = {}
