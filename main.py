@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         uic.loadUi('main_window.ui', self)
         self.progressBar.setValue(0)
-        self.setWindowTitle("Aquaphor")
+        self.setWindowTitle("отчеты калибровки Aquaphor International")
 
         # блок данных программы
         self.settings = {}
@@ -207,7 +207,7 @@ class MainWindow(QMainWindow):
                     col += 1
                 col = 1
                 row += 1
-        book.save("sours/reports/report.xlsx")
+        book.save("sours/reports/calibration report.xlsx")
         book.close()
 
     def send_to_email(self):
@@ -217,9 +217,9 @@ class MainWindow(QMainWindow):
             msg['From'] = self._SENDER
             msg['To'] = email
 
-            with open("sours/reports/report.xlsx", 'rb') as f:
+            with open("sours/reports/calibration report.xlsx", 'rb') as f:
                 file_data = f.read()
-            msg.add_attachment(file_data, maintype="application", subtype="xlsx", filename="report.xlsx")
+            msg.add_attachment(file_data, maintype="application", subtype="xlsx", filename="calibration report.xlsx")
 
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
                 smtp.login(self._SENDER, self._SENDER_PASSWORD)
