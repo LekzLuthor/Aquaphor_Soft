@@ -31,8 +31,8 @@ class MainWindow(QMainWindow):
         self.emails = []
 
         # данные почты для отправки писем
-        self.SENDER = 'calibration.aquaphor@gmail.com'
-        self.SENDER_PASSWORD = 'ogwgkvtqnvjsfljr'
+        self._SENDER = 'calibration.aquaphor@gmail.com'
+        self._SENDER_PASSWORD = 'ogwgkvtqnvjsfljr'
 
         # привязка кнопок + редактура полей
         self.generateReportButton.clicked.connect(self.final_build)
@@ -47,6 +47,8 @@ class MainWindow(QMainWindow):
                 self.emails.append(email)
 
     def save_changes(self):
+        self.generateReportButton.setEnabled(False)
+        self.saveChangesButton.setEnabled(False)
         email = self.emailSetForm.toPlainText()
         if email != "":
             if self.check_email(email):
@@ -90,12 +92,21 @@ class MainWindow(QMainWindow):
 
         with open("sours/settings.json", "w") as file:  # сохраняет настройки в json файл
             json.dump(self.settings, file)
-        self.loadStatusChecker.setText('')
+
+        with open("sours/settings.json", "r") as file:  # достаёт настройки из json файла
+            self.settings = json.load(file)
+            for email in self.settings["emails"]:
+                self.emails.append(email)
+
+        self.generateReportButton.setEnabled(True)
+        self.saveChangesButton.setEnabled(True)
 
     @staticmethod
     def check_email(email):  # проверка правильности ввода почты
         if email and (
-                "@aquaphor.com" in email or "@mail.ru" in email or "@gmail.com" in email or "@yandex.com" in email
+                "@aquaphor.com" in email or "@mail.ru" in email or "@gmail.com" in email or "@yandex.com" in email or
+                "@mail.com" in email or "@yandex.com" in email or "@yandex.ru" in email or "@rambler.com" in email or
+                "@gmail.ru" in email or "@y.com" in email
         ):
             return True
         else:
@@ -203,7 +214,7 @@ class MainWindow(QMainWindow):
         for email in self.emails:
             msg = EmailMessage()
             msg['Subject'] = f'{datetime.date.today()} Report'
-            msg['From'] = self.SENDER
+            msg['From'] = self._SENDER
             msg['To'] = email
 
             with open("sours/reports/report.xlsx", 'rb') as f:
@@ -211,7 +222,7 @@ class MainWindow(QMainWindow):
             msg.add_attachment(file_data, maintype="application", subtype="xlsx", filename="report.xlsx")
 
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login(self.SENDER, self.SENDER_PASSWORD)
+                smtp.login(self._SENDER, self._SENDER_PASSWORD)
                 smtp.send_message(msg)
 
     def final_build(self):
@@ -220,6 +231,7 @@ class MainWindow(QMainWindow):
         self.progressBar.setValue(60)
         self.send_to_email()
         self.progressBar.setValue(100)
+        print('done')
 
 
 def excepthook(exc_type, exc_value, exc_tb):
