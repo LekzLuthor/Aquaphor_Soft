@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         uic.loadUi('main_window.ui', self)
         self.progressBar.setValue(0)
-        self.setWindowTitle("отчеты калибровки Aquaphor International")
+        self.setWindowTitle("Calibration report Aquaphor International")
 
         # блок данных программы
         self.settings = {}
@@ -197,18 +197,20 @@ class MainWindow(QMainWindow):
         row = 1
         col = 1
         file_name_index = 0
-        sheet.cell(row=1, column=1).value = "Подразделение, использующее ИО, участок"
-        sheet.cell(row=1, column=2).value = "Наименование ИО"
-        sheet.cell(row=1, column=3).value = "Тип/вид/марка/модель ИО, НД"
-        sheet.cell(row=1, column=4).value = "Лимит и точность измерений "
-        sheet.cell(row=1, column=5).value = "Заводской (инв.) №"
-        sheet.cell(row=1, column=6).value = "Межповерочный интервал"
-        sheet.cell(row=1, column=7).value = "Дата очередных поверок (калибровок)"
-        sheet.cell(row=1, column=9).value = "Примечание"
+
         for key in self.equipment_report.keys():
             row += 3
             sheet.cell(row=row, column=col).value = self.excel_files_names[file_name_index]
             row += 2
+            sheet.cell(row=row, column=1).value = "Подразделение, использующее ИО, участок"
+            sheet.cell(row=row, column=2).value = "Наименование ИО"
+            sheet.cell(row=row, column=3).value = "Тип/вид/марка/модель ИО, НД"
+            sheet.cell(row=row, column=4).value = "Лимит и точность измерений "
+            sheet.cell(row=row, column=5).value = "Заводской (инв.) №"
+            sheet.cell(row=row, column=6).value = "Межповерочный интервал"
+            sheet.cell(row=row, column=7).value = "Дата очередных поверок (калибровок)"
+            sheet.cell(row=row, column=9).value = "Примечание"
+            row += 1
             for equip in self.equipment_report[key]:
                 for item in equip:
                     sheet.cell(row=row, column=col).value = item
